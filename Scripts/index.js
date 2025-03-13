@@ -1,3 +1,12 @@
+function removeActiveClass(){
+    const activeButtons = document.getElementsByClassName("active");
+    console.log(activeButtons);
+    for(let btn of activeButtons){
+        btn.classList.remove("active");
+    }
+    
+}
+
 function loadCatagories() {
   // fetch the data
   fetch("https://openapi.programming-hero.com/api/phero-tube/categories")
@@ -10,7 +19,30 @@ function loadCatagories() {
 function loadVideos() {
   fetch("https://openapi.programming-hero.com/api/phero-tube/videos")
     .then((response) => response.json())
-    .then((data) => displayVideos(data.videos));
+    .then((data) => {
+        removeActiveClass();
+        document.getElementById("btn-all").classList.add("active")
+        displayVideos(data.videos)
+    });
+}
+
+function loadCatagoryVideos(id){
+    
+    const url =`
+    https://openapi.programming-hero.com/api/phero-tube/category/${id}
+    `
+    console.log(url);
+    
+    fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+        removeActiveClass();
+        const clickedButton = document.getElementById(`btn-${id}`);
+        clickedButton.classList.add("active")
+        
+        displayVideos(data.category)
+    });
+    
 }
 
 function displayCatagories(catagories) {
@@ -22,7 +54,7 @@ function displayCatagories(catagories) {
     // create element
     const categoryDiv = document.createElement("div");
     categoryDiv.innerHTML = `
-        <button class="btn btn-sm hover:bg-[#FF1F3D] hover:text-white">${cat.category}</button>
+        <button id="btn-${cat.category_id}" onclick="loadCatagoryVideos(${cat.category_id})" class="btn btn-sm hover:bg-[#FF1F3D] hover:text-white">${cat.category}</button>
         `;
     // append the element
     categoryContainer.appendChild(categoryDiv);
@@ -31,6 +63,18 @@ function displayCatagories(catagories) {
 
 const displayVideos = (videos) => {
   const videoContainer = document.getElementById("video-container");
+
+  videoContainer.innerHTML ="";
+
+  if(videos.length ===0){
+    videoContainer.innerHTML=`
+        <div class="col-span-full flex flex-col justify-center items-center text-center">
+            <img src="Assets/Icon.png" alt="">
+            <h1 class="text-2xl font-bold">Oops!! Sorry, There is no content here</h1>
+        </div>
+    `
+    return;
+  }
   videos.forEach((video) => {
     // console.log(video);
 
